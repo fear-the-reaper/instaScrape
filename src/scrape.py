@@ -1,7 +1,8 @@
 import instaloader
 import utils
 import requests
-
+import db
+import sentiment
 
 def detect_complaint(text: str) -> bool:
     # List of complaint keywords
@@ -16,7 +17,6 @@ def detect_complaint(text: str) -> bool:
     
     # Return False if no complaint keywords are found
     return False  
-
 
 
 def scrape_comments(post_url: str) -> dict | None:
@@ -47,7 +47,14 @@ def scrape_comments(post_url: str) -> dict | None:
         # Loop through each comment and extract the username and text
         for comment in comments:
             try:
-                scraped_comment = {"username": comment.owner.username, "text": comment.text}
+                sentiment_analysis = sentiment.analyze_sentiment(comment.text)
+                is_complaint = detect_complaint(comment.text)
+                scraped_comment = {
+                    "username": comment.owner.username, 
+                    "comment": comment.text,
+                    "is_complaint": is_complaint,
+                    "sentiment": sentiment_analysis if sentiment_analysis is not None else "-"
+                }
                 scraped_comments["comments"].append(scraped_comment)
             except Exception as e:
                 # Handle individual comment parsing errors
@@ -95,4 +102,17 @@ def generate_alert(post_url: str, username: str, comment_text: str) -> None:
 print("Running..")
 scraped_comments = scrape_comments("https://www.instagram.com/p/Cr88aWTt2Rs/")
 if scraped_comments is not None and len(scraped_comments) > 0:
-    print(scraped_comments)
+    db_pool = db.createDbPool()
+    if db_pool is not None:
+        try:
+            conn = db_pool.getconn()
+            for comment in scraped_comments["comments"]:
+                data_to_insert = {
+                    "post_url": scraped_comments["post_url"],
+                    **comment
+                }
+                utils.insert_comment(conn, data_to_insert)
+        except Exception as e:
+            pass
+    else:
+        pass
