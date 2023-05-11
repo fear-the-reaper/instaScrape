@@ -6,10 +6,10 @@ CREATE TABLE instagram_comments (
     id SERIAL PRIMARY KEY,
     post_url VARCHAR(255),
     username VARCHAR(255),
-    comment_text TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
+    comment TEXT,
     is_complaint BOOLEAN,
-    sentiment VARCHAR(20)
+    sentiment VARCHAR(20),
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMIT;

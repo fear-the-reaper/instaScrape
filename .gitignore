@@ -7,3 +7,5 @@
 /src/*.http
 /src/test.py
 /share
+/.env
+/load_env.bat
