@@ -3,6 +3,8 @@ import utils
 import requests
 import db
 import sentiment
+import screenshot
+
 
 def detect_complaint(text: str) -> bool:
     # List of complaint keywords
@@ -18,6 +20,25 @@ def detect_complaint(text: str) -> bool:
     # Return False if no complaint keywords are found
     return False  
 
+def detect_cs_comment(comment: str) -> bool:
+    cs_keywords = ['algorithm', 'programming', 'machine learning', 'data structures', 'coding']
+    comment = comment.lower()  # Convert the comment to lowercase for case-insensitive matching
+    
+    for keyword in cs_keywords:
+        if keyword in comment:
+            return True
+    
+    return False
+
+def has_replies(comment) -> bool:
+    answers = comment.answers
+    num_of_answers = len(list(answers))
+    if num_of_answers > 0:
+        return True
+    return False
+
+def get_screenshot():
+    pass
 
 def scrape_comments(post_url: str) -> dict | None:
     # Instagram username to use for authentication
@@ -33,26 +54,41 @@ def scrape_comments(post_url: str) -> dict | None:
         }
         
         # Load session from file using the specified username
-        loader.load_session_from_file(username)
+        loader.load_session_from_file(username, "session_file")
+        
         
         # Extract the shortcode from the post URL
         short_code = utils.get_shortcode(post_url)
         
+
         # Get the Post object for the specified shortcode
         post = instaloader.Post.from_shortcode(loader.context, short_code)
         
         # Get the comments for the Post
         comments = post.get_comments()
         
-        # Loop through each comment and extract the username and text
+        print(f"Scraping comments for post {post_url}")
+
+        # Loop through each comment and e   xtract the username and text
         for comment in comments:
             try:
                 sentiment_analysis = sentiment.analyze_sentiment(comment.text)
                 is_complaint = detect_complaint(comment.text)
+                is_cs_comment = detect_cs_comment(comment.text)
+                # print(f"comment id: {comment.id}")
+                comment_url = f"{post_url}?comment_id={comment.id}"
+                print(f"comment text: {comment.text}")
+                print(f"comment url: {comment_url}")
+                replied = False
+                replied = has_replies(comment)
+                if not replied:
+                    print(f"getting the ss")
+                    screenshot.get_screenshot(comment.text, comment_url)
                 scraped_comment = {
                     "username": comment.owner.username, 
                     "comment": comment.text,
                     "is_complaint": is_complaint,
+                    "is_cs_comment": is_cs_comment,
                     "sentiment": sentiment_analysis if sentiment_analysis is not None else "-"
                 }
                 scraped_comments["comments"].append(scraped_comment)
@@ -100,19 +136,19 @@ def generate_alert(post_url: str, username: str, comment_text: str) -> None:
         print(f'An error occurred: {error}')
 
 print("Running..")
-scraped_comments = scrape_comments("https://www.instagram.com/p/Cr88aWTt2Rs/")
-if scraped_comments is not None and len(scraped_comments) > 0:
-    db_pool = db.createDbPool()
-    if db_pool is not None:
-        try:
-            conn = db_pool.getconn()
-            for comment in scraped_comments["comments"]:
-                data_to_insert = {
-                    "post_url": scraped_comments["post_url"],
-                    **comment
-                }
-                utils.insert_comment(conn, data_to_insert)
-        except Exception as e:
-            pass
-    else:
-        pass
+scraped_comments = scrape_comments("https://www.instagram.com/p/CrTdpzkra0-/")
+# if scraped_comments is not None and len(scraped_comments) > 0:
+#     db_pool = db.createDbPool()
+#     if db_pool is not None:
+#         try:
+#             conn = db_pool.getconn()
+#             for comment in scraped_comments["comments"]:
+#                 data_to_insert = {
+#                     "post_url": scraped_comments["post_url"],
+#                     **comment
+#                 }
+#                 utils.insert_comment(conn, data_to_insert)
+#         except Exception as e:
+#             pass
+#     else:
+#         pass

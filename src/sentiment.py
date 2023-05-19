@@ -64,9 +64,3 @@ def analyze_sentiment(text: str) -> str | None:
     except Exception as e:
         print(f'Error in analyze_sentiment: {e}')
         return None
-
-
-
-text = "I want to get this shirt"
-senti = analyze_sentiment(text)
-print(f"The sentiment is {senti}")
