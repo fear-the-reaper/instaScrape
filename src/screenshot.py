@@ -22,5 +22,5 @@ def get_screenshot(text: str, url) -> str | None:
             file_name = f"{comment_text}.png"
             comment.screenshot(file_name)
             return file_name
-        
+
     return None

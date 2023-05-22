@@ -77,12 +77,9 @@ def scrape_comments(post_url: str) -> dict | None:
                 is_cs_comment = detect_cs_comment(comment.text)
                 # print(f"comment id: {comment.id}")
                 comment_url = f"{post_url}?comment_id={comment.id}"
-                print(f"comment text: {comment.text}")
-                print(f"comment url: {comment_url}")
                 replied = False
                 replied = has_replies(comment)
                 if not replied:
-                    print(f"getting the ss")
                     screenshot.get_screenshot(comment.text, comment_url)
                 scraped_comment = {
                     "username": comment.owner.username, 
@@ -135,8 +132,9 @@ def generate_alert(post_url: str, username: str, comment_text: str) -> None:
     except Exception as error:
         print(f'An error occurred: {error}')
 
-print("Running..")
-scraped_comments = scrape_comments("https://www.instagram.com/p/CrTdpzkra0-/")
+# print("Running..")
+# scraped_comments = scrape_comments("https://www.instagram.com/p/CrTdpzkra0-/")
+# print(scraped_comments)
 # if scraped_comments is not None and len(scraped_comments) > 0:
 #     db_pool = db.createDbPool()
 #     if db_pool is not None:

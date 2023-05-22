@@ -8,6 +8,7 @@ CREATE TABLE instagram_comments (
     username VARCHAR(255),
     comment TEXT,
     is_complaint BOOLEAN,
+    is_cs_related BOOLEAN,
     sentiment VARCHAR(20),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

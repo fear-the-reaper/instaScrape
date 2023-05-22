@@ -9,3 +9,5 @@
 /share
 /.env
 /load_env.bat
+/src/*.png
+*.zip
