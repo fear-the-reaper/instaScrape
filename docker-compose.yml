@@ -1,0 +1,32 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: instaScrape-db
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=instaScrape
+    volumes: 
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - test_network
+  api:
+    build: .
+    container_name: instaScrape-api
+    ports:
+      - "8000:8000"
+    environment:
+      # apologies to taha firoz for naming this wrong
+      DB_HOST: instaScrape-db
+      DATABASE: instaScrape
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      DB_PORT: 5432
+    networks:
+      - test_network
+
+# defined my own network here where the db n this is connected
+networks:
+  test_network:
+    external: true

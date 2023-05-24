@@ -48,6 +48,7 @@ def scrape_comments(post_url: str) -> dict | None:
         # Create an Instaloader instance
         loader = instaloader.Instaloader()
         
+    
         # Initialize an empty dictionary to hold the scraped comments
         scraped_comments = {
             "post_url": post_url, "comments": []
@@ -79,13 +80,15 @@ def scrape_comments(post_url: str) -> dict | None:
                 comment_url = f"{post_url}?comment_id={comment.id}"
                 replied = False
                 replied = has_replies(comment)
+                screenshot_img = None
                 if not replied:
-                    screenshot.get_screenshot(comment.text, comment_url)
+                    screenshot_img = screenshot.get_screenshot(comment.text, comment_url)
                 scraped_comment = {
                     "username": comment.owner.username, 
                     "comment": comment.text,
                     "is_complaint": is_complaint,
                     "is_cs_comment": is_cs_comment,
+                    "screenshot_img": screenshot_img,
                     "sentiment": sentiment_analysis if sentiment_analysis is not None else "-"
                 }
                 scraped_comments["comments"].append(scraped_comment)
